@@ -7,6 +7,7 @@ import {
 } from "@solana/web3.js";
 import BufferLayout from "buffer-layout";
 import { TokenInstructions } from "@project-serum/serum";
+import BN from "bn.js";
 
 export const ACCOUNT_LAYOUT = BufferLayout.struct([
   BufferLayout.blob(32, "mint"),
@@ -78,4 +79,15 @@ export async function createAndInitializeTokenAccount({
   );
   const signers = [payer, newAccount];
   return await connection.sendTransaction(transaction, signers);
+}
+
+export function makeClientOrderId(bits = 64): BN {
+  let binaryString = "1";
+  for (let i = 1; i < bits; i++) {
+    binaryString += Math.max(
+      Math.min(Math.floor(Math.random() * 2), 1),
+      0
+    ).toString();
+  }
+  return new BN(binaryString, 2);
 }

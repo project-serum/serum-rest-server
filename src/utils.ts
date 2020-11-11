@@ -5,6 +5,7 @@ import winston, { format } from "winston";
 import "winston-daily-rotate-file";
 const { combine, timestamp, printf } = format;
 import fs from "fs";
+import { Dir } from "./exchange/types";
 // Logging
 if (
   LOGGING_DIR &&
@@ -93,4 +94,31 @@ export function divideBnToNumber(numerator: BN, denominator: BN): number {
   const rem = numerator.umod(denominator);
   const gcd = rem.gcd(denominator);
   return quotient + rem.div(gcd).toNumber() / denominator.div(gcd).toNumber();
+}
+
+export class DirUtil {
+  public static buySell = (dir: Dir): "buy" | "sell" => {
+    return dir === 1 ? "buy" : "sell";
+  };
+
+  public static parse = (raw: string | bigint | Dir): Dir => {
+    if (raw === Dir.B) {
+      return Dir.B;
+    } else if (raw === Dir.S) {
+      return Dir.S;
+    } else if (
+      typeof raw === "string" &&
+      ["bid", "buy", "b", "create", "long"].includes(raw.toLowerCase())
+    ) {
+      return Dir.B;
+    } else if (
+      typeof raw === "string" &&
+      ["ask", "sell", "sale", "a", "s", "redeem", "short"].includes(
+        raw.toLowerCase()
+      )
+    ) {
+      return Dir.S;
+    }
+    throw TypeError(`Cannot parse Dir from ${raw}`);
+  };
 }

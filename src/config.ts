@@ -17,6 +17,7 @@ export const RESTART_INTERVAL_SEC = parseInt(
 
 export const HARD_CODED_MINTS = process.env.HARD_CODED_MINTS || {};
 export const DEFAULT_TIMEOUT = 15000;
+export const BLOCKHASH_CACHE_TIME = 30;
 export const NUM_CONNECTIONS = 1;
 export const SOLANA_URL =
   process.env.SOLANA_URL || "http://validator-lb.wirelesstable.net";

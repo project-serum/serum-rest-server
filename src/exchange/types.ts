@@ -128,7 +128,7 @@ export interface MarketInfo {
   [propName: string]: unknown;
 }
 
-export interface SerumFill {
+export interface RawTrade {
   size: number;
   price: number;
   side: string;
@@ -213,3 +213,15 @@ export class SerumOrder {
     };
   }
 }
+
+export interface TimestampedL2Levels {
+  orderbook: [number, number][];
+  receivedAt: number;
+}
+
+export type TokenAccountInfo = {
+  pubkey: PublicKey;
+  mint: PublicKey;
+  owner: PublicKey;
+  amount: number;
+};
