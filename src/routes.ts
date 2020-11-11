@@ -32,4 +32,35 @@ router.get(
   })
 );
 
+router.get("/orderbook/:coin-:quote", expressAsyncHandler(async (req, res, next) => {
+  logger.info(`Received request to ${req.params.exchange} api getOrderbook`);
+  api
+    .getWsOrderBook(req.params.coin, req.params.quote)
+    .then((orderBook) => res.send({ status: "ok", data: orderBook }))
+    .catch((err) => next(err));
+}));
+
+router.get("/trades/:coin-:quote", expressAsyncHandler(async (req, res, next) => {
+  logger.info(`Received request to ${req.params.exchange} api trades`);
+  api
+    .getTrades(req.params.coin, req.params.quote)
+    .then((trades) => res.send({ status: "ok", data: trades }))
+    .catch((err) => {
+      logger.info(err);
+      next(err);
+    });
+}));
+
+router.get("/place_order", expressAsyncHandler(async (req, res, next) => {}));
+
+router.get("/cancel/:orderId", expressAsyncHandler(async (req, res, next) => {}));
+
+router.get("/own_orders", expressAsyncHandler(async (req, res, next) => {}));
+
+router.get("/fills", expressAsyncHandler(async (req, res, next) => {}));
+
+router.get("/balances", expressAsyncHandler(async (req, res, next) => {}));
+
+router.get("/settle", expressAsyncHandler(async (req, res, next) => {}));
+
 export { router as default };
