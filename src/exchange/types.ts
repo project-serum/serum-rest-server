@@ -5,7 +5,7 @@ import BN from "bn.js";
 export type Coin = string;
 export type Exchange = string;
 
-export class Market {
+export class Pair {
   coin;
   priceCurrency;
 
@@ -19,15 +19,15 @@ export class Market {
   }
 
   key(): string {
-    return Market.key(this.coin, this.priceCurrency);
+    return Pair.key(this.coin, this.priceCurrency);
   }
 
-  static fromKey(key: string): Market {
+  static fromKey(key: string): Pair {
     const [coin, priceCurrency] = key.split("/");
-    return new Market(coin, priceCurrency);
+    return new Pair(coin, priceCurrency);
   }
 
-  equals(other: Market): boolean {
+  equals(other: Pair): boolean {
     return (
       other.coin === this.coin && other.priceCurrency === this.priceCurrency
     );
@@ -109,7 +109,7 @@ export interface Fill<T = any> {
 export interface L2OrderBook {
   bids: [number, number][];
   asks: [number, number][];
-  market: Market;
+  market: Pair;
   validAt: number;
   receivedAt: number;
 }
@@ -118,7 +118,7 @@ export interface OwnOrders<T = Order> {
   [orderId: string]: T;
 }
 
-export interface SerumMarketInfo {
+export interface MarketInfo {
   address: PublicKey;
   baseMint: PublicKey;
   quoteMint: PublicKey;

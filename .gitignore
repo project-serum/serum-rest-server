@@ -117,3 +117,5 @@ dist
 
 .idea/
 lib/
+
+secrets.json

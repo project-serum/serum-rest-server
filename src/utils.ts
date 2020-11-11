@@ -71,9 +71,7 @@ class MorganStream {
 }
 export const morganStream = new MorganStream();
 
-export const getKeys = (
-  keys: string[]
-): string[] => {
+export const getKeys = (keys: string[]): any[] => {
   const allSecrets = JSON.parse(readFileSync(SECRETS_FILE, "utf-8"));
   const secrets: string[] = [];
   for (const key of keys) {

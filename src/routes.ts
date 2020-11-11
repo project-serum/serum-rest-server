@@ -1,5 +1,5 @@
 import express from "express";
-import {SerumApi} from "./exchange/api";
+import { SerumApi } from "./exchange/api";
 import expressAsyncHandler from "express-async-handler";
 import { logger } from "./utils";
 
@@ -7,9 +7,7 @@ const router = express.Router();
 let api: SerumApi;
 
 router.get("/", (req, res, next) => {
-  res.send(
-    "Hello from the Serum rest server!"
-  );
+  res.send("Hello from the Serum rest server!");
 });
 
 router.use(

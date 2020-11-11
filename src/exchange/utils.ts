@@ -1,4 +1,10 @@
-import {Account, Connection, PublicKey, SystemProgram, Transaction} from "@solana/web3.js";
+import {
+  Account,
+  Connection,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
 import BufferLayout from "buffer-layout";
 import { TokenInstructions } from "@project-serum/serum";
 
@@ -29,7 +35,6 @@ export const MINT_LAYOUT = BufferLayout.struct([
   BufferLayout.blob(4, "freezeAuthorityOption"),
   BufferLayout.blob(32, "freezeAuthority"),
 ]);
-
 
 export function parseMintData(
   data: Buffer
