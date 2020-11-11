@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
-import { Order as SerumOwnOrder } from "@project-serum/serum/lib/market";
 import BN from "bn.js";
+import { Order as SerumOrder } from "@project-serum/serum/lib/market";
 
 export type Coin = string;
 export type Exchange = string;
@@ -78,6 +78,73 @@ export class Order<T = any> {
   }
 }
 
+export class OrderInfo {
+  orderId: string;
+  openOrdersAddress: string;
+  openOrdersSlot: number;
+  price: number;
+  priceLots: string;
+  size: number;
+  sizeLots: string;
+  side: "buy" | "sell";
+  clientId: string;
+  feeTier: number;
+
+  constructor(
+    orderId: string,
+    openOrdersAddress: string,
+    openOrdersSlot: number,
+    price: number,
+    priceLots: string,
+    size: number,
+    sizeLots: string,
+    side: "buy" | "sell",
+    clientId: string,
+    feeTier: number
+  ) {
+    this.orderId = orderId;
+    this.openOrdersAddress = openOrdersAddress;
+    this.openOrdersSlot = openOrdersSlot;
+    this.price = price;
+    this.priceLots = priceLots;
+    this.size = size;
+    this.sizeLots = sizeLots;
+    this.side = side;
+    this.clientId = clientId;
+    this.feeTier = feeTier;
+  }
+
+  static fromSerumOrder(order: SerumOrder): OrderInfo {
+    return new OrderInfo(
+      order.orderId.toString(),
+      order.openOrdersAddress.toBase58(),
+      order.openOrdersSlot,
+      order.price,
+      order.priceLots.toString(),
+      order.size,
+      order.sizeLots.toString(),
+      order.side,
+      order.clientId ? order.clientId.toString() : "",
+      order.feeTier
+    );
+  }
+
+  toSerumOrder(): SerumOrder {
+    return {
+      orderId: new BN(this.orderId),
+      openOrdersAddress: new PublicKey(this.openOrdersAddress),
+      openOrdersSlot: this.openOrdersSlot,
+      price: this.price,
+      priceLots: new BN(this.priceLots),
+      size: this.size,
+      sizeLots: new BN(this.sizeLots),
+      side: this.side,
+      clientId: new BN(this.clientId),
+      feeTier: this.feeTier,
+    };
+  }
+}
+
 export interface Trade<T = any> {
   exchange: Exchange;
   coin: Coin;
@@ -101,8 +168,6 @@ export interface Fill<T = any> {
   time: number;
   orderId: string;
   fee: number;
-  feeCurrency: Coin;
-  liquidity: Liquidity;
   info?: T;
 }
 
@@ -145,73 +210,6 @@ export interface RawTrade {
   nativeQuantityReleased: BN;
   nativeQuantityPaid: BN;
   nativeFeeOrRebate: BN;
-}
-
-export class SerumOrder {
-  orderId: string;
-  openOrdersAddress: string;
-  openOrdersSlot: number;
-  price: number;
-  priceLots: string;
-  size: number;
-  sizeLots: string;
-  side: "buy" | "sell";
-  clientId: string;
-  feeTier: number;
-
-  constructor(
-    orderId: string,
-    openOrdersAddress: string,
-    openOrdersSlot: number,
-    price: number,
-    priceLots: string,
-    size: number,
-    sizeLots: string,
-    side: "buy" | "sell",
-    clientId: string,
-    feeTier: number
-  ) {
-    this.orderId = orderId;
-    this.openOrdersAddress = openOrdersAddress;
-    this.openOrdersSlot = openOrdersSlot;
-    this.price = price;
-    this.priceLots = priceLots;
-    this.size = size;
-    this.sizeLots = sizeLots;
-    this.side = side;
-    this.clientId = clientId;
-    this.feeTier = feeTier;
-  }
-
-  static fromSerumOrder(order: SerumOwnOrder): SerumOrder {
-    return new SerumOrder(
-      order.orderId.toString(),
-      order.openOrdersAddress.toBase58(),
-      order.openOrdersSlot,
-      order.price,
-      order.priceLots.toString(),
-      order.size,
-      order.sizeLots.toString(),
-      order.side,
-      order.clientId ? order.clientId.toString() : "",
-      order.feeTier
-    );
-  }
-
-  toSerumOrder(): SerumOwnOrder {
-    return {
-      orderId: new BN(this.orderId),
-      openOrdersAddress: new PublicKey(this.openOrdersAddress),
-      openOrdersSlot: this.openOrdersSlot,
-      price: this.price,
-      priceLots: new BN(this.priceLots),
-      size: this.size,
-      sizeLots: new BN(this.sizeLots),
-      side: this.side,
-      clientId: new BN(this.clientId),
-      feeTier: this.feeTier,
-    };
-  }
 }
 
 export interface TimestampedL2Levels {

@@ -91,3 +91,7 @@ export function makeClientOrderId(bits = 64): BN {
   }
   return new BN(binaryString, 2);
 }
+
+export function getTokenMultiplierFromDecimals(decimals: number): BN {
+  return new BN(10).pow(new BN(decimals));
+}
