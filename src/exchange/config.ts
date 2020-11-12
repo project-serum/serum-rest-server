@@ -3,7 +3,7 @@ import { HARD_CODED_MINTS } from "../config";
 import { Pair } from "./types";
 import { PublicKey } from "@solana/web3.js";
 
-export const MARKET_PARAMS = MARKETS.map((marketInfo) => {
+export const MARKET_PARAMS = MARKETS.filter(marketInfo => !marketInfo.deprecated).map((marketInfo) => {
   const [coin, priceCurrency] = marketInfo.name.split("/");
   return {
     address: marketInfo.address,
