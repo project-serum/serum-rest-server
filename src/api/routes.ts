@@ -60,7 +60,9 @@ router.get(
 router.get(
   "/trades/:coin-:quote",
   expressAsyncHandler(async (req, res, next) => {
-    logger.info("Received request to api getTrades");
+    logger.info(
+      `Received request to api getTrades. Coin: ${req.params.coin}, Price Currency: ${req.params.quote}`
+    );
     api
       .getTrades(req.params.coin, req.params.quote)
       .then((trades) => sendSuccessfulResponse(res, trades))
