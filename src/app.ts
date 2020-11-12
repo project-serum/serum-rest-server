@@ -1,7 +1,7 @@
 import createError from "http-errors";
 import express from "express";
 import { default as morgan } from "morgan";
-import indexRouter from "./routes";
+import indexRouter from "./api/routes";
 import { logger, morganStream } from "./utils";
 import * as config from "./config";
 
