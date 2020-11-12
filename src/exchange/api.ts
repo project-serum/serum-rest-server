@@ -12,7 +12,8 @@ import {
 import {
   Coin,
   Dir,
-  Exchange, Fill,
+  Exchange,
+  Fill,
   L2OrderBook,
   MarketInfo,
   Order,
@@ -743,6 +744,27 @@ export class SerumApi {
     );
   }
 
+  async cancelByClientId(
+    orderId: string,
+    coin: Coin,
+    priceCurrency: Coin
+  ): Promise<void> {
+    const { transaction, signers } = await this.makeCancelByClientIdTransaction(
+      orderId,
+      coin,
+      priceCurrency
+    );
+    const txid = await this.sendTransaction(
+      transaction,
+      signers,
+      DEFAULT_TIMEOUT,
+      () => {}
+    );
+    logger.debug(
+      `finished sending cancel transaction:\n${orderId}\ntxid ${txid}`
+    );
+  }
+
   async makeCancelByClientIdTransaction(
     orderId: string,
     coin: Coin,
@@ -768,7 +790,8 @@ export class SerumApi {
       // Assume we sent with lowest sort open orders account
       account = accountsForMarket.sort(this.compareOpenOrdersAccounts)[0];
       logger.debug(
-        `Did not find order (${orderId}) in open order accounts. Using ${account.publicKey.toBase58()} as account.`
+        `Did not find order (${orderId}) in open order accounts. 
+        Using ${account.publicKey.toBase58()} as account.`
       );
     }
     logger.info(
@@ -788,6 +811,59 @@ export class SerumApi {
     const signers = [new Account(this._privateKey)];
     return {
       transaction: txn,
+      signers,
+    };
+  }
+
+  async cancelByStandardOrderId(
+    orderId: string,
+    coin: Coin,
+    priceCurrency: Coin
+  ): Promise<void> {
+    const {
+      transaction,
+      signers,
+    } = await this.makeCancelByStandardIdTransaction(
+      orderId,
+      coin,
+      priceCurrency
+    );
+    const txid = await this._connection.sendTransaction(transaction, signers, {
+      skipPreflight: true,
+    });
+    await this.awaitTransactionSignatureConfirmation(txid);
+  }
+
+  async makeCancelByStandardIdTransaction(
+    orderId: string,
+    coin: Coin,
+    priceCurrency: Coin
+  ): Promise<{ transaction: Transaction; signers: Account[] }> {
+    const market = new Pair(coin, priceCurrency);
+    let order = this.getOrderFromOwnOrdersCache(orderId, market);
+    if (!order) {
+      this.getOwnOrders(coin, priceCurrency);
+      order = this.getOrderFromOwnOrdersCache(orderId, market);
+      if (!order) {
+        throw Error("Could not find order for cancellation.");
+      }
+    }
+    logger.info(
+      `Cancelling ${orderId} ${coin} ${priceCurrency} using orderId ${order.info.orderId}`
+    );
+
+    const serumMarket = await this.getMarketFromAddress(
+      this.getMarketAddress(coin, priceCurrency)
+    );
+    const transaction = await serumMarket.makeCancelOrderTransaction(
+      this._connection,
+      this._publicKey,
+      order.info.toSerumOrder()
+    );
+    transaction.add(serumMarket.makeMatchOrdersTransaction(5));
+    const signers = [new Account(this._privateKey)];
+    return {
+      transaction,
       signers,
     };
   }
@@ -910,11 +986,7 @@ export class SerumApi {
     ).then((fills) => fills.reduce((acc, curr) => [...acc, ...curr]));
   }
 
-  parseRawFills(
-    rawFills: RawTrade[],
-    coin: Coin,
-    priceCurrency: Coin
-  ): Fill[] {
+  parseRawFills(rawFills: RawTrade[], coin: Coin, priceCurrency: Coin): Fill[] {
     const time = getUnixTs();
     const parseFill = (rawFill): Fill => {
       return {
