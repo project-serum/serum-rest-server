@@ -1,1 +1,1 @@
-# serum-rest-wip
+# serum-rest-server
