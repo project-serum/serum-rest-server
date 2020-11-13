@@ -62,6 +62,7 @@ import {
 } from "./solana";
 import { WRAPPED_SOL_MINT } from "@project-serum/serum/lib/token-instructions";
 import { parse as urlParse } from "url";
+import bs58 from "bs58";
 
 export class SerumApi {
   static readonly exchange: Exchange = "serum";
@@ -115,7 +116,7 @@ export class SerumApi {
     this.exchange = exchange;
     this._connections = conections;
     this._privateKey = getKeys([`${this.exchange}_private_key`])[0];
-    this._account = new Account(this._privateKey);
+    this._account = new Account(bs58.decode(this._privateKey));
     this._publicKey = this._account.publicKey;
     this._loadedMarkets = {};
     this._wsOrderbooks = {};
@@ -641,7 +642,7 @@ export class SerumApi {
     logger.info(
       `Order parameters: ${side}, ${coin}, ${priceCurrency}, ${quantity}, ${price}, ${orderType}`
     );
-    const owner = new Account(this._privateKey);
+    const owner = this._account;
     let payer;
     if (coin === "SOL" && side === Dir.S) {
       payer = this._publicKey;
@@ -808,7 +809,7 @@ export class SerumApi {
       new BN(orderId)
     );
     txn.add(market.makeMatchOrdersTransaction(5));
-    const signers = [new Account(this._privateKey)];
+    const signers = [this._account];
     return {
       transaction: txn,
       signers,
@@ -861,7 +862,7 @@ export class SerumApi {
       order.info.toSerumOrder()
     );
     transaction.add(serumMarket.makeMatchOrdersTransaction(5));
-    const signers = [new Account(this._privateKey)];
+    const signers = [this._account];
     return {
       transaction,
       signers,
@@ -1366,7 +1367,7 @@ export class SerumApi {
           market
             .settleFunds(
               this._connection,
-              new Account(this._privateKey),
+              this._account,
               openOrders,
               baseTokenAccount,
               quoteTokenAccount
